@@ -1,4 +1,4 @@
-resource "aws_s3_bucket" "bad_bucket" {
+resource "aws_s3_bucket" "good_bucket" {
   bucket = "prisma-cloud-test-bucket"
   acl    = "public-read" # This is a misconfiguration (public-read ACL)
 
@@ -8,7 +8,7 @@ resource "aws_s3_bucket" "bad_bucket" {
   }
 }
 
-resource "aws_security_group" "bad_security_group" {
+resource "aws_security_group" "good_security_group" {
   name        = "prisma-cloud-test-sg"
   description = "Allow all inbound traffic"
 
