@@ -16,8 +16,8 @@ resource "aws_security_group" "example" {
   name        = "example-sg"
   description = "Example security group"
 
-  tags = {
-    "env"         = "production"    # Required tag for compliance
-    "cost_center" = "1234"          # Required tag for compliance
-  }
+ # tags = {
+ #  "env"         = "production"    # Required tag for compliance
+ #   "cost_center" = "1234"          # Required tag for compliance
+ # }
 }
