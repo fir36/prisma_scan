@@ -8,6 +8,19 @@ resource "aws_s3_bucket" "secure_bucket" {
   }
 }
 
+
+resource "aws_s3_bucket" "secure_bucket_log_bucket" {
+  bucket = "secure_bucket-log-bucket"
+}
+
+resource "aws_s3_bucket_logging" "secure_bucket" {
+  bucket = aws_s3_bucket.secure_bucket.id
+
+  target_bucket = aws_s3_bucket.secure_bucket_log_bucket.id
+  target_prefix = "log/"
+}
+
+
 resource "aws_security_group" "secure_security_group" {
   name        = "prisma-cloud-secure-sg"
   description = "Allow specific inbound traffic"
