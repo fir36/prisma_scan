@@ -1,5 +1,5 @@
 name: Prisma Cloud CI/CD Integration
-
+ 
 on:
   push:
     branches:
