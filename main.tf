@@ -8,6 +8,19 @@ resource "aws_s3_bucket" "good_bucket" {
   }
 }
 
+
+resource "aws_s3_bucket" "good_bucket_log_bucket" {
+  bucket = "good_bucket-log-bucket"
+}
+
+resource "aws_s3_bucket_logging" "good_bucket" {
+  bucket = aws_s3_bucket.good_bucket.id
+
+  target_bucket = aws_s3_bucket.good_bucket_log_bucket.id
+  target_prefix = "log/"
+}
+
+
 resource "aws_security_group" "good_security_group" {
   name        = "prisma-cloud-test-sg"
   description = "Allow specific inbound traffic"
