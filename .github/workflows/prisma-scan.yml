@@ -1,4 +1,4 @@
-name: Prisma Cloud CI/CD Integration
+name: Prisma Cloud CI/CD Integration 
 
 on:
   push:
