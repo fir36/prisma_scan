@@ -1,23 +1,23 @@
 name: Prisma Cloud CI/CD Integration
- 
+
 on:
   push:
     branches:
-      - main
-  pull_request:
+      - main   # Runs on push to the main branch
+  pull_request:  # Runs on pull requests
 
 jobs:
   prisma-cloud-scan:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Uses the latest Ubuntu runner
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2  # Checks out the repository code
 
       - name: Run Prisma Cloud
         id: prisma-cloud
-        uses: bridgecrewio/checkov-action@master
+        uses: bridgecrewio/checkov-action@master  # Uses the Checkov action to scan your code
         env:
-          PRISMA_API_URL: https://api.sg.prismacloud.io
+          PRISMA_API_URL: https://api.sg.prismacloud.io  # Prisma Cloud API URL
         with:
-          api-key: ${{ secrets.BC_API_KEY }}
+          api-key: ${{ secrets.BC_API_KEY }}  # Uses the secret API key from GitHub secrets
