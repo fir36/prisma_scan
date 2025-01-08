@@ -3,7 +3,7 @@ name: Prisma Cloud CI/CD Integration
 on:
   push:
     branches:
-      - main   # Runs on push to the main branch
+      - main   # Runs on push to the main branchm
   pull_request:  # Runs on pull requests
 
 jobs:
