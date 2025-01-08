@@ -3,8 +3,8 @@ resource "aws_s3_bucket" "good_bucket" {
   acl    = "private" # Fixed: ACL set to private for enhanced security
 
   tags = {
-    Name        = "PrismaCloudTestBucket"
-    Environment = "Test"
+    "git_org"        = "PrismaCloudTestBucket"
+    "yor_trace" = "Test"
   }
 }
 
