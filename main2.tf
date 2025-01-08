@@ -5,12 +5,20 @@ resource "aws_s3_bucket" "secure_bucket" {
   tags = {
     Name        = "PrismaCloudSecureBucket"
     Environment = "Production"
+    git_org     = "fir36"
+    git_repo    = "prisma_scan"
+    yor_trace   = "7266d380-b9ba-4690-bc8c-4fbbdf7161e5"
   }
 }
 
 
 resource "aws_s3_bucket" "secure_bucket_log_bucket" {
   bucket = "secure_bucket-log-bucket"
+  tags = {
+    git_org   = "fir36"
+    git_repo  = "prisma_scan"
+    yor_trace = "5af8f7ed-2de8-4936-9353-2024cc313499"
+  }
 }
 
 resource "aws_s3_bucket_logging" "secure_bucket" {
@@ -42,5 +50,8 @@ resource "aws_security_group" "secure_security_group" {
   tags = {
     Name        = "PrismaCloudSecureSG"
     Environment = "Production"
+    git_org     = "fir36"
+    git_repo    = "prisma_scan"
+    yor_trace   = "fc4345f3-a055-4756-b7a8-c34bf2193f1f"
   }
 }
