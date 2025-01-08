@@ -42,5 +42,6 @@ resource "aws_security_group" "good_security_group" {
   tags = {
     Name        = "PrismaCloudTestSG"
     Environment = "Test"
+    "yor_trace" = "abc123"        # Unique trace tag
   }
 }
