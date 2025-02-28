@@ -1,7 +1,7 @@
 provider "aws" {
   region = "us-east-1"
 } 
-
+  
 # 🚨 Insecure S3 Bucket: Public Access Enabled 
 resource "aws_s3_bucket" "insecure_bucket" {
   bucket = "prisma-cloud-insecure-bucket"
