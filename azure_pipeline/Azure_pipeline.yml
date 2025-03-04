@@ -19,7 +19,7 @@ stages:
               sudo apt-get update && sudo apt-get install -y jq unzip
 
               # Fetch latest GitHub Action Run ID
-              RESPONSE=$(curl -s -H "Authorization: Bearer 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" \
+              RESPONSE=$(curl -s -H "Authorization: Bearer "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"" \
               -H "Accept: application/vnd.github.v3+json" \
               "https://api.github.com/repos/fir36/prisma_scan/actions/runs")
 
@@ -38,7 +38,7 @@ stages:
 
               # Fetch logs
               echo "Fetching logs..."
-              curl -s -H "Authorization: Bearer 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" \
+              curl -s -H "Authorization: Bearer "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"" \
                   -H "Accept: application/vnd.github.v3+json" \
                   "https://api.github.com/repos/fir36/prisma_scan/actions/runs/$RUN_ID/logs" \
                   -o github_scan_logs.zip
@@ -55,7 +55,7 @@ stages:
               cat github_logs/*
             displayName: "Fetch and Extract GitHub Logs"
             env:
-              GITHUB_PAT: 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
+              GITHUB_PAT: "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"
 
           - script: |
               echo "✅ Printing test.yaml contents..."
