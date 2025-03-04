@@ -3,35 +3,21 @@ name: Prisma Cloud CI/CD Integration
 on:
   push:
     branches:
-      - main   # Runs on push to the main branch
+      - main   # Runs on push to the main branchm
   pull_request:  # Runs on pull requests
 
 jobs:
   prisma-cloud-scan:
-    runs-on: self-hosted  # Uses the self-hosted runner (same as Azure DevOps)
+    runs-on: ubuntu-latest  # Uses the latest Ubuntu runner
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2  # Checks out the repository code
 
-      - name: Install Python and pip (if missing)
-        run: |
-          sudo apt update -y
-          sudo apt install -y python3 python3-pip
-          python3 --version
-          pip3 --version
-
-      - name: Install Checkov (No Docker)
-        run: pip3 install checkov
-
-      - name: Run Prisma Cloud Scan
+      - name: Run Prisma Cloud
+        id: prisma-cloud
+        uses: bridgecrewio/checkov-action@master  # Uses the Checkov action to scan your code
         env:
           PRISMA_API_URL: https://api.sg.prismacloud.io  # Prisma Cloud API URL
-          BC_API_KEY: ${{ secrets.BC_API_KEY }}  # Prisma Cloud API key from GitHub Secrets
-        run: checkov -d . --bc-api-key $BC_API_KEY --repo-id my-org/my-repo --soft-fail
-
-      - name: Save Scan Results for Azure DevOps
-        run: |
-          mkdir -p /shared-folder
-          checkov -d . --bc-api-key $BC_API_KEY --repo-id my-org/my-repo --output cli > /shared-folder/prisma-scan-result.txt
-          echo "Scan results saved to /shared-folder/prisma-scan-result.txt"
+        with:
+          api-key: ${{ secrets.BC_API_KEY }}  # Uses the secret API key from GitHub secrets
