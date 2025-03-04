@@ -16,9 +16,9 @@ stages:
         echo "Fetching Prisma Cloud scan results from GitHub Actions..."
 
             # Fetch latest GitHub Action Run ID
-        RESPONSE=$(curl -s -H "Authorization: Bearer $GITHUB_PAT" \
+        RESPONSE=$(curl -s -H "Authorization: Bearer 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" \
         -H "Accept: application/vnd.github.v3+json" \
-        "https://api.github.com/repos/<your-org>/<your-repo>/actions/runs")
+        "https://api.github.com/fir36/prisma_scan/actions/runs")
 
         echo "GitHub API Response:"
         echo "$RESPONSE"  # Print full response for debugging
@@ -38,7 +38,7 @@ stages:
 
         # Fetch logs
         echo "Fetching logs..."
-        curl -s -H "Authorization: Bearer $GITHUB_PAT" \
+        curl -s -H "Authorization: Bearer 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" \
             -H "Accept: application/vnd.github.v3+json" \
             https://api.github.com/fir36/prisma_scan/actions/runs/$RUN_ID/logs \
             -o github_scan_logs.zip
@@ -55,7 +55,7 @@ stages:
         echo "✅ Displaying scan logs..."
         cat github_logs/*
       env:
-        GITHUB_PAT: $(GITHUB_PAT)
+        GITHUB_PAT: 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
 
 - stage: Development
   displayName: "Development Stage"
