@@ -62,24 +62,26 @@ stages:
               cat github_logs/test.yaml || echo "❌ test.yaml not found!"
             displayName: "Show test.yaml Contents"
 
-- stage: Development
-  displayName: "Development Stage"
-  dependsOn: PrismaScan
-  jobs:
-  - job: Build
-    displayName: "Build the Application"
-    pool:
-      name: "Default"  # Use the same agent pool
-    steps:
-    - script: echo "Building the application..."
+  - stage: Development
+    displayName: "Development Stage"
+    dependsOn: PrismaScan
+    jobs:
+      - job: Build
+        displayName: "Build the Application"
+        pool:
+          name: "Default"  # Use the same agent pool
+        steps:
+          - script: echo "Building the application..."
+            displayName: "Build Step"
 
-- stage: Deploy
-  displayName: "Deploy Stage"
-  dependsOn: Development
-  jobs:
-  - job: Deploy
-    displayName: "Deploy the Application"
-    pool:
-      name: "Default"  # Use the same agent pool
-    steps:
-    - script: echo "Deploying the application..."
+  - stage: Deploy
+    displayName: "Deploy Stage"
+    dependsOn: Development
+    jobs:
+      - job: Deploy
+        displayName: "Deploy the Application"
+        pool:
+          name: "Default"  # Use the same agent pool
+        steps:
+          - script: echo "Deploying the application..."
+            displayName: "Deploy Step"
