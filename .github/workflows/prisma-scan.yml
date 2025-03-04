@@ -14,8 +14,15 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v2  # Checks out the repository code
 
+      - name: Install Python and pip (if missing)
+        run: |
+          sudo apt update -y
+          sudo apt install -y python3 python3-pip
+          python3 --version
+          pip3 --version
+
       - name: Install Checkov (No Docker)
-        run: pip install checkov
+        run: pip3 install checkov
 
       - name: Run Prisma Cloud Scan
         env:
@@ -26,5 +33,5 @@ jobs:
       - name: Save Scan Results for Azure DevOps
         run: |
           mkdir -p /shared-folder
-          echo "Prisma Cloud Scan Completed Successfully" > /shared-folder/prisma-scan-result.txt
+          checkov -d . --bc-api-key $BC_API_KEY --repo-id my-org/my-repo --output cli > /shared-folder/prisma-scan-result.txt
           echo "Scan results saved to /shared-folder/prisma-scan-result.txt"
