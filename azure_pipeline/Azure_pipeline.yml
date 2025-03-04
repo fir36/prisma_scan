@@ -13,50 +13,50 @@ stages:
           name: "Default"  # Replace with your actual agent pool
         steps:
           - script: |
-            echo "Fetching Prisma Cloud scan results from GitHub Actions..."
+              echo "Fetching Prisma Cloud scan results from GitHub Actions..."
 
-            # Install dependencies
-            sudo apt-get update && sudo apt-get install -y jq unzip
+              # Install dependencies
+              sudo apt-get update && sudo apt-get install -y jq unzip
 
-            # Fetch latest GitHub Action Run ID
-            RESPONSE=$(curl -s -H "Authorization: Bearer $GITHUB_PAT" \
-            -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/fir36/prisma_scan/actions/runs")
+              # Fetch latest GitHub Action Run ID
+              RESPONSE=$(curl -s -H "Authorization: Bearer $GITHUB_PAT" \
+              -H "Accept: application/vnd.github.v3+json" \
+              "https://api.github.com/repos/fir36/prisma_scan/actions/runs")
 
-            echo "GitHub API Response:"
-            echo "$RESPONSE"  # Print full response for debugging
+              echo "GitHub API Response:"
+              echo "$RESPONSE"  # Print full response for debugging
 
-            # Extract latest GitHub Action Run ID (including all statuses)
-            RUN_ID=$(echo "$RESPONSE" | jq -r '.workflow_runs | .[0].id')
+              # Extract latest GitHub Action Run ID (without status filter for debugging)
+              RUN_ID=$(echo "$RESPONSE" | jq -r '.workflow_runs | .[0].id')
 
-            if [ -z "$RUN_ID" ] || [ "$RUN_ID" == "null" ]; then
-              echo "❌ Failed to get GitHub Action Run ID"
-              exit 1
-            fi
+              if [ -z "$RUN_ID" ] || [ "$RUN_ID" == "null" ]; then
+                echo "❌ Failed to get GitHub Action Run ID"
+                exit 1
+              fi
 
-            echo "✅ GitHub Action Run ID: $RUN_ID"
+              echo "✅ GitHub Action Run ID: $RUN_ID"
 
-            # Fetch logs
-            echo "Fetching logs..."
-            curl -s -H "Authorization: Bearer $GITHUB_PAT" \
-                -H "Accept: application/vnd.github.v3+json" \
-                "https://api.github.com/repos/fir36/prisma_scan/actions/runs/$RUN_ID/logs" \
-                -o github_scan_logs.zip
+              # Fetch logs
+              echo "Fetching logs..."
+              curl -s -H "Authorization: Bearer $GITHUB_PAT" \
+                  -H "Accept: application/vnd.github.v3+json" \
+                  "https://api.github.com/repos/fir36/prisma_scan/actions/runs/$RUN_ID/logs" \
+                  -o github_scan_logs.zip
 
-            if [ ! -f "github_scan_logs.zip" ]; then
-              echo "❌ Log download failed!"
-              exit 1
-            fi
+              if [ ! -f "github_scan_logs.zip" ]; then
+                echo "❌ Log download failed!"
+                exit 1
+              fi
 
-            echo "✅ Download complete. Extracting logs..."
-            unzip -o github_scan_logs.zip -d github_logs/
+              echo "✅ Download complete. Extracting logs..."
+              unzip -o github_scan_logs.zip -d github_logs/
 
-            echo "✅ Displaying scan logs..."
-            cat github_logs/*
-          displayName: "Fetch and Extract GitHub Logs"
-          env:
-            GITHUB_PAT: $(GITHUB_PAT)
-            
+              echo "✅ Displaying scan logs..."
+              cat github_logs/*
+            displayName: "Fetch and Extract GitHub Logs"
+            env:
+              GITHUB_PAT: $(GITHUB_PAT)
+
           - script: |
               echo "✅ Printing test.yaml contents..."
               cat github_logs/test.yaml || echo "❌ test.yaml not found!"
@@ -72,7 +72,6 @@ stages:
           name: "Default"  # Use the same agent pool
         steps:
           - script: echo "Building the application..."
-            displayName: "Build Step"
 
   - stage: Deploy
     displayName: "Deploy Stage"
@@ -84,4 +83,3 @@ stages:
           name: "Default"  # Use the same agent pool
         steps:
           - script: echo "Deploying the application..."
-            displayName: "Deploy Step"
