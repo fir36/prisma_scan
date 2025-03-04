@@ -4,7 +4,6 @@ trigger:
       - main  # Trigger when pushing to the main branch
 
 stages:
-stages:
 - stage: PrismaScan
   displayName: "Prisma Scan"
   jobs:
