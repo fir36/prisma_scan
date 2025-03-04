@@ -4,78 +4,63 @@ trigger:
       - main  # Trigger when pushing to the main branch
 
 stages:
-- stage: PrismaScan
-  displayName: "Prisma Scan"
-  jobs:
-  - job: FetchScanResults
-    displayName: "Fetch Prisma Scan Results from GitHub"
-    pool:
-      name: "Default"  # Replace with your actual agent pool
-    steps:
-     - script: |
-        echo "A Fetching Prisma Cloud scan results from GitHub Actions..."
+  - stage: PrismaScan
+    displayName: "Prisma Scan"
+    jobs:
+      - job: FetchScanResults
+        displayName: "Fetch Prisma Scan Results from GitHub"
+        pool:
+          name: "Default"  # Replace with your actual agent pool
+        steps:
+          - script: |
+              echo "Fetching Prisma Cloud scan results from GitHub Actions..."
 
-        # Fetch latest GitHub Action Run ID
-        RESPONSE=$(curl -s -H "Authorization: Bearer $GITHUB_PAT" \
-        -H "Accept: application/vnd.github.v3+json" \
-        "https://api.github.com/repos/fir36/prisma_scan/actions/runs")
+              # Install dependencies
+              sudo apt-get update && sudo apt-get install -y jq unzip
 
-        echo "GitHub API Response:"
-        echo "$RESPONSE"  # Print full response for debugging
-    
-        # Extract latest GitHub Action Run ID
-        RUN_ID=$(echo "$RESPONSE" | jq -r '.workflow_runs[0].id')
+              # Fetch latest GitHub Action Run ID
+              RESPONSE=$(curl -s -H "Authorization: Bearer $GITHUB_PAT" \
+              -H "Accept: application/vnd.github.v3+json" \
+              "https://api.github.com/repos/fir36/prisma_scan/actions/runs")
 
-        if [ -z "$RUN_ID" ] || [ "$RUN_ID" == "null" ]; then
-          echo "❌ Failed to get GitHub Action Run ID"
-          exit 1
-        fi
+              echo "GitHub API Response:"
+              echo "$RESPONSE"  # Print full response for debugging
 
-        echo "✅ GitHub Action Run ID: $RUN_ID"
-      displayName: "Fetch and Debug GitHub Logs"
-      env:
-        GITHUB_PAT: $(GITHUB_PAT)
-    - script: |
-        echo "Fetching Prisma Cloud scan results from GitHub Actions..."
+              # Extract latest GitHub Action Run ID (only from completed runs)
+              RUN_ID=$(echo "$RESPONSE" | jq -r '.workflow_runs | map(select(.status == "completed")) | .[0].id')
 
-        # Install dependencies
-        sudo apt-get update && sudo apt-get install -y jq unzip
+              if [ -z "$RUN_ID" ] || [ "$RUN_ID" == "null" ]; then
+                echo "❌ Failed to get GitHub Action Run ID"
+                exit 1
+              fi
 
-        # Fetch latest GitHub Action Run ID
-        RUN_ID=$(curl -s -H "Authorization: Bearer $GITHUB_PAT" \
-        -H "Accept: application/vnd.github.v3+json" \
-        "https://api.github.com/repos/fir36/prisma_scan/actions/runs" | jq -r '.workflow_runs[0].id')
+              echo "✅ GitHub Action Run ID: $RUN_ID"
 
-        if [ -z "$RUN_ID" ] || [ "$RUN_ID" == "null" ]; then
-          echo "❌ Failed to get GitHub Action Run ID"
-          exit 1
-        fi
+              # Fetch logs
+              echo "Fetching logs..."
+              curl -s -H "Authorization: Bearer $GITHUB_PAT" \
+                  -H "Accept: application/vnd.github.v3+json" \
+                  "https://api.github.com/repos/fir36/prisma_scan/actions/runs/$RUN_ID/logs" \
+                  -o github_scan_logs.zip
 
-        echo "✅ GitHub Action Run ID: $RUN_ID"
+              if [ ! -f "github_scan_logs.zip" ]; then
+                echo "❌ Log download failed!"
+                exit 1
+              fi
 
-        # Fetch logs
-        echo "Fetching logs..."
-        curl -s -H "Authorization: Bearer $GITHUB_PAT" \
-            -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/fir36/prisma_scan/actions/runs/$RUN_ID/logs" \
-            -o github_scan_logs.zip
+              echo "✅ Download complete. Extracting logs..."
+              unzip -o github_scan_logs.zip -d github_logs/
 
-        if [ ! -f "github_scan_logs.zip" ]; then
-          echo "❌ Log download failed!"
-          exit 1
-        fi
+              echo "✅ Displaying scan logs..."
+              cat github_logs/*
+            displayName: "Fetch and Extract GitHub Logs"
+            env:
+              GITHUB_PAT: $(GITHUB_PAT)
 
-        echo "✅ Extracting logs..."
-        unzip -o github_scan_logs.zip -d github_logs/
-      displayName: "Fetch and Extract GitHub Logs"
-      env:
-        GITHUB_PAT: $(GITHUB_PAT)  # Move env inside the script step
-
-    - script: |
-        echo "✅ Printing test.yaml contents..."
-        cat github_logs/test.yaml
-      displayName: "Show test.yaml Contents"
-
+          - script: |
+              echo "✅ Printing test.yaml contents..."
+              cat github_logs/test.yaml || echo "❌ test.yaml not found!"
+            displayName: "Show test.yaml Contents"
 
 - stage: Development
   displayName: "Development Stage"
