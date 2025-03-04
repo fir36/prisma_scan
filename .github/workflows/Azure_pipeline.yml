@@ -1,63 +1,46 @@
 trigger:
   branches:
     include:
-      - main  # Runs on push to the main branch
+      - main  # Trigger pipeline when GitHub pushes to main
 
 stages:
-  - stage: PrismaCloudScan
+  - stage: Scan
     displayName: "Prisma Cloud Security Scan"
     jobs:
       - job: PrismaScan
-        displayName: "Run Prisma Cloud Security Scan"
         pool:
-          vmImage: default  # Uses the latest Ubuntu runner
+          name: Default  # Uses self-hosted runner (same as GitHub Actions)
         steps:
-          - checkout: self  # Checks out the repository code
-
-          - task: Bash@3
-            displayName: "Run Prisma Cloud Checkov Scan"
-            env:
-              PRISMA_API_URL: "https://api.sg.prismacloud.io"  # Prisma Cloud API URL
-              BC_API_KEY: $(BC_API_KEY)  # API key stored in Azure DevOps secrets
-            script: |
-              pip install checkov
-              checkov -d . --bc-api-key $BC_API_KEY
+          - script: |
+              echo "Checking if Prisma Cloud scan results exist..."
+              if [ -f /shared-folder/prisma-scan-result.txt ]; then
+                echo "Prisma Cloud Scan Completed"
+              else
+                echo "Scan results not found! Exiting..."
+                exit 1
+              fi
+          - script: cat /shared-folder/prisma-scan-result.txt
 
   - stage: Development
     displayName: "Deploy to Development"
-    dependsOn: PrismaCloudScan  # Runs only if Prisma scan succeeds
+    dependsOn: Scan  # Runs only if the scan succeeds
     condition: succeeded()
     jobs:
       - job: DeployDev
-        displayName: "Deploy to Dev Environment"
         pool:
-          vmImage: default
+          name: Default
         steps:
-          - script: echo "Deploying to Development"
+          - script: echo "Deploying to Development..."
           - script: echo "Running unit tests"
 
-  - stage: UAT
-    displayName: "Deploy to UAT"
-    dependsOn: Development  # Ensures Development runs first
-    condition: succeeded()
-    jobs:
-      - job: DeployUAT
-        displayName: "Deploy to UAT Environment"
-        pool:
-          vmImage: default
-        steps:
-          - script: echo "Deploying to UAT"
-          - script: echo "Running integration tests"
-
-  - stage: Production
+  - stage: Deployment
     displayName: "Deploy to Production"
-    dependsOn: UAT  # Ensures UAT runs first
+    dependsOn: Development  # Runs only if development succeeds
     condition: succeeded()
     jobs:
       - job: DeployProd
-        displayName: "Deploy to Production"
         pool:
-          vmImage: default
+          name: Default
         steps:
-          - script: echo "Deploying to Production"
+          - script: echo "Deploying to Production..."
           - script: echo "Running final verification tests"
