@@ -7,20 +7,21 @@ stages:
   - stage: PrismaCloudScan
     displayName: "Prisma Cloud Security Scan"
     jobs:
-      prisma-cloud-scan:
-        runs-on: ubuntu-latest  # Uses the latest Ubuntu runner
-
+      - job: PrismaScan
+        displayName: "Run Prisma Cloud Security Scan"
+        pool:
+          vmImage: default  # Uses the latest Ubuntu runner
         steps:
-        - name: Checkout repo
-          uses: actions/checkout@v2  # Checks out the repository code
+          - checkout: self  # Checks out the repository code
 
-        - name: Run Prisma Cloud
-          id: prisma-cloud
-          uses: bridgecrewio/checkov-action@master  # Uses the Checkov action to scan your code
-          env:
-            PRISMA_API_URL: https://api.sg.prismacloud.io  # Prisma Cloud API URL
-          with:
-            api-key: ${{ secrets.BC_API_KEY }}
+          - task: Bash@3
+            displayName: "Run Prisma Cloud Checkov Scan"
+            env:
+              PRISMA_API_URL: "https://api.sg.prismacloud.io"  # Prisma Cloud API URL
+              BC_API_KEY: $(BC_API_KEY)  # API key stored in Azure DevOps secrets
+            script: |
+              pip install checkov
+              checkov -d . --bc-api-key $BC_API_KEY
 
   - stage: Development
     displayName: "Deploy to Development"
@@ -29,6 +30,8 @@ stages:
     jobs:
       - job: DeployDev
         displayName: "Deploy to Dev Environment"
+        pool:
+          vmImage: default
         steps:
           - script: echo "Deploying to Development"
           - script: echo "Running unit tests"
@@ -40,6 +43,8 @@ stages:
     jobs:
       - job: DeployUAT
         displayName: "Deploy to UAT Environment"
+        pool:
+          vmImage: default
         steps:
           - script: echo "Deploying to UAT"
           - script: echo "Running integration tests"
@@ -51,6 +56,8 @@ stages:
     jobs:
       - job: DeployProd
         displayName: "Deploy to Production"
+        pool:
+          vmImage: default
         steps:
           - script: echo "Deploying to Production"
           - script: echo "Running final verification tests"
