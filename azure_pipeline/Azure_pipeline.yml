@@ -1,43 +1,42 @@
 trigger:
   branches:
     include:
-      - main  # Runs only when pushing to main
-
-pr: none  # Prevents PR-triggered runs
+      - main  # Trigger when pushing to the main branch
 
 stages:
-  - stage: Prisma_Scan
-    displayName: "GitHub Security Scan"
-    jobs:
-      - job: wait_for_github_scan
-        displayName: "Wait for GitHub Scan to Complete"
-        pool: server  # Runs without an agent
-        steps:
-          - checkout: none  # No need to checkout code
+- stage: PrismaScan
+  displayName: "Prisma Scan"
+  jobs:
+  - job: RunGithubAction
+    displayName: "Trigger GitHub Action for Prisma Scan"
+    steps:
+    - script: |
+        echo "Triggering GitHub Action for Prisma Scan..."
+      #   curl -X POST -H "Accept: application/vnd.github.everest-preview+json" \
+      #        -H "Authorization: token $(GITHUB_PAT)" \
+      #        https://api.github.com/repos/<your-org>/<your-repo>/actions/workflows/<your-github-action.yml>/dispatches \
+      #        -d '{"ref":"main"}'
+      # env:
+      #   GITHUB_PAT: $(GITHUB_PAT) # GitHub Personal Access Token (store in Azure DevOps secrets)
 
-          - script: |
-              echo "Waiting for GitHub Action to complete..."
-              sleep 60  # Optional delay to allow the scan to complete
-
-  - stage: Development
-    displayName: "Development"
-    dependsOn: Prisma_Scan  # Runs after GitHub scan
-    jobs:
-      - job: build_and_test
-        runs-on: ubuntu-latest
-        steps:
-          - name: Checkout Repository
-            uses: actions/checkout@v2
-
-          - name: Build and Test
-            run: echo "Building and testing application"
-
-  - stage: Deploy
-    displayName: "Deploy"
-    dependsOn: Development  # Runs after Development
-    jobs:
-      - job: deploy_app
-        runs-on: ubuntu-latest
-        steps:
-          - name: Deploy Application
-            run: echo "Deploying application"
+- stage: Development
+  displayName: "Development Stage"
+  dependsOn: PrismaScan
+  jobs:
+  - job: Build
+    displayName: "Build the Application"
+    pool:
+      vmImage: default
+    steps:
+    - script: echo "Building the application..."
+      
+- stage: Deploy
+  displayName: "Deploy Stage"
+  dependsOn: Development
+  jobs:
+  - job: Deploy
+    displayName: "Deploy the Application"
+    pool:
+      vmImage: default
+    steps:
+    - script: echo "Deploying the application..."
