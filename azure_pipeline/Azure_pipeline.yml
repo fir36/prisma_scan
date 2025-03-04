@@ -44,14 +44,15 @@ stages:
 
         echo "✅ Extracting logs..."
         unzip -o github_scan_logs.zip -d github_logs/
-        
+      displayName: "Fetch and Extract GitHub Logs"
+      env:
+        GITHUB_PAT: $(GITHUB_PAT)  # Move env inside the script step
+
     - script: |
         echo "✅ Printing test.yaml contents..."
         cat github_logs/test.yaml
       displayName: "Show test.yaml Contents"
-    
-    env:
-      GITHUB_PAT: $(GITHUB_PAT)
+
 
 - stage: Development
   displayName: "Development Stage"
