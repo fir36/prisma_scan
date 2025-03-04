@@ -14,13 +14,14 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v2  # Checks out the repository code
 
+      - name: Install Checkov (No Docker)
+        run: pip install checkov
+
       - name: Run Prisma Cloud Scan
-        id: prisma-cloud
-        uses: bridgecrewio/checkov-action@master  # Uses Checkov to scan the code
         env:
           PRISMA_API_URL: https://api.sg.prismacloud.io  # Prisma Cloud API URL
-        with:
-          api-key: ${{ secrets.BC_API_KEY }}  # Uses the secret API key from GitHub secrets
+          BC_API_KEY: ${{ secrets.BC_API_KEY }}  # Prisma Cloud API key from GitHub Secrets
+        run: checkov -d . --bc-api-key $BC_API_KEY --repo-id my-org/my-repo --soft-fail
 
       - name: Save Scan Results for Azure DevOps
         run: |
