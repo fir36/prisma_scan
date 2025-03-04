@@ -10,7 +10,7 @@ stages:
       - job: Scan
         displayName: "Run Prisma Cloud Scan"
         pool:
-          vmImage: ubuntu-latest  # Runs on latest Ubuntu agent
+          vmImage: windows-latest  # Runs on latest Ubuntu agent
         steps:
           - checkout: self  # Checkout the repository
           
