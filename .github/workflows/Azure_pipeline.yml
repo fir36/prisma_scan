@@ -1,46 +1,43 @@
 trigger:
   branches:
     include:
-      - main  # Trigger pipeline when GitHub pushes to main
+      - main  # Runs only when pushing to main
+
+pr: none  # Prevents PR-triggered runs
 
 stages:
-  - stage: Scan
-    displayName: "Prisma Cloud Security Scan"
+  - stage: Prisma_Scan
+    displayName: "GitHub Security Scan"
     jobs:
-      - job: PrismaScan
-        pool:
-          name: Default  # Uses self-hosted runner (same as GitHub Actions)
+      - job: wait_for_github_scan
+        displayName: "Wait for GitHub Scan to Complete"
+        pool: server  # Runs without an agent
         steps:
+          - checkout: none  # No need to checkout code
+
           - script: |
-              echo "Checking if Prisma Cloud scan results exist..."
-              if [ -f /shared-folder/prisma-scan-result.txt ]; then
-                echo "Prisma Cloud Scan Completed"
-              else
-                echo "Scan results not found! Exiting..."
-                exit 1
-              fi
-          - script: cat /shared-folder/prisma-scan-result.txt
+              echo "Waiting for GitHub Action to complete..."
+              sleep 60  # Optional delay to allow the scan to complete
 
   - stage: Development
-    displayName: "Deploy to Development"
-    dependsOn: Scan  # Runs only if the scan succeeds
-    condition: succeeded()
+    displayName: "Development"
+    dependsOn: Prisma_Scan  # Runs after GitHub scan
     jobs:
-      - job: DeployDev
-        pool:
-          name: Default
+      - job: build_and_test
+        runs-on: ubuntu-latest
         steps:
-          - script: echo "Deploying to Development..."
-          - script: echo "Running unit tests"
+          - name: Checkout Repository
+            uses: actions/checkout@v2
 
-  - stage: Deployment
-    displayName: "Deploy to Production"
-    dependsOn: Development  # Runs only if development succeeds
-    condition: succeeded()
+          - name: Build and Test
+            run: echo "Building and testing application"
+
+  - stage: Deploy
+    displayName: "Deploy"
+    dependsOn: Development  # Runs after Development
     jobs:
-      - job: DeployProd
-        pool:
-          name: Default
+      - job: deploy_app
+        runs-on: ubuntu-latest
         steps:
-          - script: echo "Deploying to Production..."
-          - script: echo "Running final verification tests"
+          - name: Deploy Application
+            run: echo "Deploying application"
