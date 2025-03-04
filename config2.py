@@ -4,7 +4,7 @@ AWS_SECRET_ACCESS_KEY = "123/K7MDENG/EXAMPLEKEY"
 
 # API Key exposed in plain text
 API_KEY = "12345-pppp-67890-fghij"
-
+ 
 # Base64-encoded secret (Prisma Cloud might flag this)
 ENCODED_SECRET = "21321442="  # Base64 for "secret_password12345"
 
