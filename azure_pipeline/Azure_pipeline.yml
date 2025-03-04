@@ -26,7 +26,7 @@ stages:
   - job: Build
     displayName: "Build the Application"
     pool:
-      vmImage: default
+      name: default
     steps:
     - script: echo "Building the application..."
       
@@ -37,6 +37,6 @@ stages:
   - job: Deploy
     displayName: "Deploy the Application"
     pool:
-      vmImage: default
+      name: default
     steps:
     - script: echo "Deploying the application..."
