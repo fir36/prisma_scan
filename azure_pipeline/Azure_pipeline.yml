@@ -9,6 +9,8 @@ stages:
   jobs:
   - job: RunGithubAction
     displayName: "Trigger GitHub Action for Prisma Scan"
+    pool:
+      name: "Default"  # Replace with your actual agent pool name
     steps:
     - script: |
         echo "Triggering GitHub Action for Prisma Scan..."
@@ -26,10 +28,10 @@ stages:
   - job: Build
     displayName: "Build the Application"
     pool:
-      name: default
+      name: "Default"  # Use the same agent pool
     steps:
     - script: echo "Building the application..."
-      
+
 - stage: Deploy
   displayName: "Deploy Stage"
   dependsOn: Development
@@ -37,6 +39,6 @@ stages:
   - job: Deploy
     displayName: "Deploy the Application"
     pool:
-      name: default
+      name: "Default"  # Use the same agent pool
     steps:
     - script: echo "Deploying the application..."
