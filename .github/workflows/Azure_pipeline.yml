@@ -7,18 +7,20 @@ stages:
   - stage: PrismaCloudScan
     displayName: "Prisma Cloud Security Scan"
     jobs:
-      - job: Scan
-        displayName: "Run Prisma Cloud Scan"
-        pool:
-          name: default  # Runs on latest Ubuntu agent
+      prisma-cloud-scan:
+        runs-on: ubuntu-latest  # Uses the latest Ubuntu runner
+
         steps:
-          - checkout: self  # Checkout the repository
-          
-          - script: |
-              echo "Running Prisma Cloud scan..."
-              pip install checkov  # Install Checkov scanner
-              checkov -d . --framework terraform,kubernetes,dockerfile  # Scan code
-            displayName: "Run Checkov Security Scan"
+        - name: Checkout repo
+          uses: actions/checkout@v2  # Checks out the repository code
+
+        - name: Run Prisma Cloud
+          id: prisma-cloud
+          uses: bridgecrewio/checkov-action@master  # Uses the Checkov action to scan your code
+          env:
+            PRISMA_API_URL: https://api.sg.prismacloud.io  # Prisma Cloud API URL
+          with:
+            api-key: ${{ secrets.BC_API_KEY }}
 
   - stage: Development
     displayName: "Deploy to Development"
