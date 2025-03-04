@@ -1,0 +1,54 @@
+trigger:
+  branches:
+    include:
+      - main  # Runs on push to the main branch
+
+stages:
+  - stage: PrismaCloudScan
+    displayName: "Prisma Cloud Security Scan"
+    jobs:
+      - job: Scan
+        displayName: "Run Prisma Cloud Scan"
+        pool:
+          vmImage: ubuntu-latest  # Runs on latest Ubuntu agent
+        steps:
+          - checkout: self  # Checkout the repository
+          
+          - script: |
+              echo "Running Prisma Cloud scan..."
+              pip install checkov  # Install Checkov scanner
+              checkov -d . --framework terraform,kubernetes,dockerfile  # Scan code
+            displayName: "Run Checkov Security Scan"
+
+  - stage: Development
+    displayName: "Deploy to Development"
+    dependsOn: PrismaCloudScan  # Runs only if Prisma scan succeeds
+    condition: succeeded()
+    jobs:
+      - job: DeployDev
+        displayName: "Deploy to Dev Environment"
+        steps:
+          - script: echo "Deploying to Development"
+          - script: echo "Running unit tests"
+
+  - stage: UAT
+    displayName: "Deploy to UAT"
+    dependsOn: Development  # Ensures Development runs first
+    condition: succeeded()
+    jobs:
+      - job: DeployUAT
+        displayName: "Deploy to UAT Environment"
+        steps:
+          - script: echo "Deploying to UAT"
+          - script: echo "Running integration tests"
+
+  - stage: Production
+    displayName: "Deploy to Production"
+    dependsOn: UAT  # Ensures UAT runs first
+    condition: succeeded()
+    jobs:
+      - job: DeployProd
+        displayName: "Deploy to Production"
+        steps:
+          - script: echo "Deploying to Production"
+          - script: echo "Running final verification tests"
