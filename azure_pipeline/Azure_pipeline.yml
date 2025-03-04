@@ -19,15 +19,9 @@ stages:
         sudo apt-get update && sudo apt-get install -y jq unzip
 
         # Fetch latest GitHub Action Run ID
-        RESPONSE=$(curl -s -H "Authorization: Bearer $GITHUB_PAT" \
+        RUN_ID=$(curl -s -H "Authorization: Bearer $GITHUB_PAT" \
         -H "Accept: application/vnd.github.v3+json" \
-        "https://api.github.com/repos/fir36/prisma_scan/actions/runs")
-
-        echo "GitHub API Response:"
-        echo "$RESPONSE"  # Print full response for debugging
-    
-        # Extract latest GitHub Action Run ID
-        RUN_ID=$(echo "$RESPONSE" | jq -r '.workflow_runs[0].id')
+        "https://api.github.com/repos/fir36/prisma_scan/actions/runs" | jq -r '.workflow_runs[0].id')
 
         if [ -z "$RUN_ID" ] || [ "$RUN_ID" == "null" ]; then
           echo "❌ Failed to get GitHub Action Run ID"
@@ -48,14 +42,16 @@ stages:
           exit 1
         fi
 
-        echo "✅ Download complete. Extracting logs..."
+        echo "✅ Extracting logs..."
         unzip -o github_scan_logs.zip -d github_logs/
         
-        echo "✅ Displaying scan logs..."
-        cat github_logs/*
-      env:
-        GITHUB_PAT: $(GITHUB_PAT)
-
+    - script: |
+        echo "✅ Printing test.yaml contents..."
+        cat github_logs/test.yaml
+      displayName: "Show test.yaml Contents"
+    
+    env:
+      GITHUB_PAT: $(GITHUB_PAT)
 
 - stage: Development
   displayName: "Development Stage"
